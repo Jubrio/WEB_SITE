@@ -5,26 +5,61 @@ function ModifierVent({ vente, refresh, close }) {
   const [prix, setPrix] = useState(vente.prix);
   const [quantite, setQuantite] = useState(vente.quantite);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const modifier = async (e) => {
     e.preventDefault();
+    if (!design.trim()) {
+      setMessage("La désignation est requise");
+      setError(true);
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    
+    if (!prix || prix <= 0) {
+      setMessage("Le prix doit être supérieur à 0");
+      setError(true);
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    
+    if (!quantite || quantite <= 0) {
+      setMessage("La quantité doit être supérieure à 0");
+      setError(true);
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    
     setLoading(true);
+    setMessage('');
 
-    const res = await fetch(`http://localhost:3000/ventes/${vente.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ design, prix, quantite })
-    });
+    try {
+      const res = await fetch(`http://localhost:3000/ventes/${vente.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          design, 
+          prix: parseFloat(prix), 
+          quantite: parseInt(quantite) 
+        })
+      });
 
-    const data = await res.json();
-    setLoading(false);
-    setMessage(data.message);
+      const data = await res.json();
+      setLoading(false);
+      setMessage(data.message);
+      setError(false);
 
-    setTimeout(() => {
-      refresh();
-      close();
-    }, 800);
+      setTimeout(() => {
+        refresh();
+        close();
+      }, 1000);
+    } catch (error) {
+      setLoading(false);
+      setMessage("Erreur de connexion au serveur");
+      setError(true);
+      setTimeout(() => setMessage(''), 3000);
+    }
   };
 
   return (
@@ -37,7 +72,9 @@ function ModifierVent({ vente, refresh, close }) {
               <span>◈</span> Modification
             </div>
             <h2 className="text-white text-2xl font-bold tracking-tight">Modifier la vente</h2>
-            <p className="text-gray-500 text-sm mt-1">ID #{vente.id} — {vente.design}</p>
+            <p className="text-gray-500 text-sm mt-1">
+              {vente.code ? `Code: ${vente.code} — ` : `ID #${vente.id} — `}{vente.design}
+            </p>
           </div>
           <button
             onClick={close}
@@ -70,6 +107,7 @@ function ModifierVent({ vente, refresh, close }) {
                 <div className="relative">
                   <input
                     type="number"
+                    step="0.01"
                     value={prix}
                     onChange={e => setPrix(e.target.value)}
                     className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 pr-12 text-white text-sm
@@ -85,6 +123,7 @@ function ModifierVent({ vente, refresh, close }) {
                 </label>
                 <input
                   type="number"
+                  step="1"
                   value={quantite}
                   onChange={e => setQuantite(e.target.value)}
                   className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-white text-sm
@@ -102,9 +141,17 @@ function ModifierVent({ vente, refresh, close }) {
             </div>
 
             {message && (
-              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
-                <span className="text-emerald-400">✓</span>
-                <p className="text-emerald-400 text-xs">{message}</p>
+              <div className={`rounded-xl px-4 py-3 flex items-center gap-2 ${
+                !error
+                  ? 'bg-emerald-500/10 border border-emerald-500/20'
+                  : 'bg-red-500/10 border border-red-500/20'
+              }`}>
+                <span className={!error ? 'text-emerald-400' : 'text-red-400'}>
+                  {!error ? '✓' : '✕'}
+                </span>
+                <p className={`text-xs ${!error ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {message}
+                </p>
               </div>
             )}
 

@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS vente (
 );
 `);
 
-console.log("✅ Table vente créée");
+console.log("Table vente créée");
 process.exit();

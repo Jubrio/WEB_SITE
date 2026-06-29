@@ -1,12 +1,13 @@
 import { useState } from 'react';
+import { Plus, List, BarChart2, LogOut } from 'lucide-react';
 
 function Head({ setPage, user, setUser, currentPage }) {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const navItems = [
-    { id: 'ajout', label: 'Ajouter une vente', icon: '✦' },
-    { id: 'liste', label: 'Liste des ventes', icon: '◈' },
-    { id: 'graph', label: 'Bilan et graph', icon: '◉' },
+    { id: 'ajout', label: 'Ajouter une vente', icon: <Plus size={13} /> },
+    { id: 'liste', label: 'Liste des ventes', icon: <List size={13} /> },
+    { id: 'graph', label: 'Bilan et graph', icon: <BarChart2 size={13} /> },
   ];
 
   return (
@@ -36,7 +37,7 @@ function Head({ setPage, user, setUser, currentPage }) {
                   }
                 `}
               >
-                <span className="text-[10px]">{item.icon}</span>
+                {item.icon}
                 {item.label}
               </button>
             ))}
@@ -51,8 +52,9 @@ function Head({ setPage, user, setUser, currentPage }) {
             </div>
             <button
               onClick={() => setShowConfirm(true)}
-              className="px-3 py-1.5 text-xs text-gray-500 hover:text-red-400 border border-white/5 hover:border-red-500/30 rounded-lg transition-all duration-200"
+              className="px-3 py-1.5 text-xs text-gray-500 hover:text-red-400 border border-white/5 hover:border-red-500/30 rounded-lg transition-all duration-200 flex items-center gap-1.5"
             >
+              <LogOut size={12} />
               Déconnexion
             </button>
           </div>
@@ -67,7 +69,7 @@ function Head({ setPage, user, setUser, currentPage }) {
           />
           <div className="relative bg-[#0f0f17] border border-white/10 rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 mx-auto mb-4">
-              <span className="text-red-400 text-xl">⎋</span>
+              <LogOut size={20} className="text-red-400" />
             </div>
             <h3 className="text-white text-base font-semibold text-center mb-1">Déconnexion</h3>
             <p className="text-gray-400 text-sm text-center mb-6">

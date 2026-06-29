@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 
 function AjoutVent() {
   const [design, setDesign] = useState('');
@@ -10,29 +11,56 @@ function AjoutVent() {
 
   const ajouter = async (e) => {
     e.preventDefault();
+
+    if (!design.trim()) {
+      setMessage("La désignation est requise");
+      setSuccess(false);
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    
+    if (!prix || prix <= 0) {
+      setMessage("Le prix doit être supérieur à 0");
+      setSuccess(false);
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    
+    if (!quantite || quantite <= 0) {
+      setMessage("La quantité doit être supérieure à 0");
+      setSuccess(false);
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    
     setLoading(true);
     setMessage('');
 
-    const res = await fetch('http://localhost:3000/ventes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ design, prix, quantite })
-    });
+    try {
+      const res = await fetch('http://localhost:3000/ventes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ design, prix: parseFloat(prix), quantite: parseInt(quantite) })
+      });
 
-    const data = await res.json();
-    setLoading(false);
-    setMessage(data.message);
-    setSuccess(true);
+      const data = await res.json();
+      setLoading(false);
+      setMessage(data.message);
+      setSuccess(true);
+      setDesign('');
+      setPrix('');
+      setQuantite('');
 
-    // Réinitialiser les champs après soumission
-    setDesign('');
-    setPrix('');
-    setQuantite('');
-
-    setTimeout(() => {
+      setTimeout(() => {
+        setSuccess(false);
+        setMessage('');
+      }, 3000);
+    } catch (error) {
+      setLoading(false);
+      setMessage("Erreur de connexion au serveur");
       setSuccess(false);
-      setMessage('');
-    }, 3000);
+      setTimeout(() => setMessage(''), 3000);
+    }
   };
 
   const montantEstime = prix && quantite ? (parseFloat(prix) * parseFloat(quantite)).toLocaleString('fr-FR') : null;
@@ -43,10 +71,10 @@ function AjoutVent() {
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-2 text-amber-400/60 text-xs font-medium tracking-widest uppercase mb-2">
-            <span>✦</span> Enregistrement
+            <span><Plus size={13} /></span> Enregistrement
           </div>
           <h2 className="text-white text-2xl font-bold tracking-tight">Nouvelle Vente</h2>
-          <p className="text-gray-500 text-sm mt-1">Saisissez les informations de la transaction</p>
+          <p className="text-gray-500 text-sm mt-1">Saisissez les informations du produit</p>
         </div>
 
         {/* Form Card */}
@@ -62,6 +90,7 @@ function AjoutVent() {
                 onChange={e => setDesign(e.target.value)}
                 className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-700
                   focus:outline-none focus:border-amber-500/40 focus:bg-white/7 transition-all duration-200"
+                required
               />
             </div>
 
@@ -73,11 +102,13 @@ function AjoutVent() {
                 <div className="relative">
                   <input
                     type="number"
+                    step="0.01"
                     placeholder="0"
                     value={prix}
                     onChange={e => setPrix(e.target.value)}
                     className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-gray-700
                       focus:outline-none focus:border-amber-500/40 focus:bg-white/7 transition-all duration-200"
+                    required
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-xs">Ar</span>
                 </div>
@@ -89,11 +120,13 @@ function AjoutVent() {
                 </label>
                 <input
                   type="number"
+                  step="1"
                   placeholder="0"
                   value={quantite}
                   onChange={e => setQuantite(e.target.value)}
                   className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-700
                     focus:outline-none focus:border-amber-500/40 focus:bg-white/7 transition-all duration-200"
+                  required
                 />
               </div>
             </div>

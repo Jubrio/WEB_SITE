@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS utilisateur (
 );
 `);
 
-console.log("✅ Table utilisateur créée");
+console.log("Table utilisateur créée");
 process.exit();

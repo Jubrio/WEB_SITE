@@ -6,24 +6,37 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* AJOUT */
 app.post('/ventes', async (req, res) => {
   const { design, prix, quantite } = req.body;
 
   try {
+    const lastCode = await pool.query(`
+      SELECT code FROM vente 
+      ORDER BY id DESC LIMIT 1
+    `);
+    
+    let newCode = 'P001';
+    
+    if (lastCode.rows.length > 0) {
+      const lastNumber = parseInt(lastCode.rows[0].code.substring(1));
+      const nextNumber = lastNumber + 1;
+      newCode = `P${nextNumber.toString().padStart(3, '0')}`;
+    }
+    
     await pool.query(
-      'INSERT INTO vente(design, prix, quantite) VALUES($1,$2,$3)',
-      [design, prix, quantite]
+      'INSERT INTO vente(code, design, prix, quantite) VALUES($1, $2, $3, $4)',
+      [newCode, design, prix, quantite]
     );
-    res.json({ message: "Insertion réussie" });
-  } catch {
-    res.json({ message: "Insertion échouée" });
+    res.json({ message: "Vente ajoutée avec succès", code: newCode });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de l'ajout" });
   }
 });
 
 /* AFFICHAGE */
 app.get('/ventes', async (req, res) => {
-  const result = await pool.query('SELECT * FROM vente');
+  const result = await pool.query('SELECT * FROM vente ORDER BY id');
   res.json(result.rows);
 });
 
@@ -89,4 +102,4 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("🚀 Serveur lancé"));
+app.listen(3000, () => console.log("Serveur lancé sur le port 3000"));
